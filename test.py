@@ -1,28 +1,39 @@
-import bcrypt
-import base64
-import os
+from lib.HanonMapRNG import HanonMapRNG
+import time
 
-def gensalt(rounds=None, prefix=None):
-    rounds = rounds if rounds is not None else 12
-    prefix = prefix if prefix is not None else b"2b"
-    
-    if prefix not in [b"2a", b"2b"]:
-        raise ValueError("Supported prefixes are b'2a' or b'2b'")
-    
-    if not (4 <= rounds <= 31):
-        raise ValueError("Invalid rounds")
-    
-    # Generate 16 random bytes for the salt
-    salt = os.urandom(16)
-    
-    # Encode the salt using base64
-    encoded_salt = base64.b64encode(salt).decode('utf-8')
-    
-    # Construct the salt string
-    salt_str = f"${prefix.decode('utf-8')}${rounds:02}${encoded_salt}"
-    
-    return salt_str
 
-# Example usage:
-salt = gensalt(rounds=12, prefix=b"2b")
-print(salt)
+if __name__=="__main__":
+ # Inisialisasi Parameter
+ x0 = 0.009260419
+ a = 1.4
+ b = -0.3
+ size = 16
+ base_iteration = 100
+ # Inisialisasi RNG
+ rng = HanonMapRNG(x0,a,b,size,base_iteration)
+ # Melakukan Pengujian
+ avg_time = 0
+ total_time = 0
+ salts = []
+ for i in range(1_000):
+    # Bangkitkan salt
+    start_time = time.time()
+    salt = rng.get_salt()
+    end_time = time.time()
+    salts.append(salt)
+    # Hitung waktu yang dibutuhkan
+    elapsed_time = end_time - start_time
+    total_time += elapsed_time
+    avg_time = total_time / (i+1)
+    if (i+1) % 100 == 0:
+      print(f"Berhasil membangkitkan {i+1} salt.")
+print("="*5,"HASIL","="*5)
+# Tes Kolisi
+salts_set = set(salts)
+if len(salts) == len(salts_set):
+  print("> Tidak ada kolisi yang terjadi.")
+else:
+  print(f"> Terdapat {len(salt)-len(salts_set)} kasus kolisi.")
+# Statistik Waktu
+print("> Total Waktu Pembangkitan 1.000 Salt:",total_time)
+print("> Rata-rata Waktu Pembangkitan 1 Salt:",avg_time)

@@ -17,7 +17,6 @@ class HanonMapRNG:
       n = self.base_iteration + int(time.time() * HanonMapRNG.SIGNIFICANT_DIGIT) % HanonMapRNG.DIGIT_MODULO
       hanon_value = self._get_hanon_map_value(n)
       salt += bytearray(struct.pack("f",hanon_value))
-    # Ubah salt menjadi string base64
     return base64.b64encode(salt)
 
   def _get_hanon_map_value(self,n:int)->float:
