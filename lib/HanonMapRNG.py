@@ -1,21 +1,28 @@
 import time
+import struct
 class HanonMapRNG:
   SIGNIFICANT_DIGIT = 10 ** 7
   DIGIT_MODULO = 10 ** 4
-  BASE_ITERATION = 1000
-  def __init__(self,x:float,a:float=1.4,b:float=-0.3) -> None:
+  def __init__(self,x:float,a:float=1.4,b:float=-0.3,min_size:int=16,base_iteration:int=1000) -> None:
     self.x:float = x
     self.a:float = a
     self.b:float = b
+    self.min_size = min_size
+    self.base_iteration = base_iteration
 
   def get_salt(self):
-    # n = HanonMapRNG.BASE_ITERATION + int(time.time() * HanonMapRNG.SIGNIFICANT_DIGIT) % HanonMapRNG.DIGIT_MODULO
-    n =10000
-    print(n)
-    value = self._get_hanon_map_value(n)
-    return value
+    salt = bytearray()
+    # print(self.min_size)
+    while len(salt)<self.min_size:
+      n = self.base_iteration + int(time.time() * HanonMapRNG.SIGNIFICANT_DIGIT) % HanonMapRNG.DIGIT_MODULO
+      hanon_value = self._get_hanon_map_value(n)
+      salt += bytearray(struct.pack("f",hanon_value))
+    return bytes(salt)
 
   def _get_hanon_map_value(self,n:int):
     for _ in range(n):
       self.x = 1-self.a * (self.x * self.x) +self.b * self.x
     return self.x
+  
+  """
+  bytearray(struct.pack("f",salt))"""
