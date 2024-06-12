@@ -1,5 +1,6 @@
 import time
 import struct
+import base64
 class HanonMapRNG:
   SIGNIFICANT_DIGIT = 10 ** 7
   DIGIT_MODULO = 10 ** 4
@@ -10,19 +11,16 @@ class HanonMapRNG:
     self.min_size = min_size
     self.base_iteration = base_iteration
 
-  def get_salt(self):
+  def get_salt(self)->bytes:
     salt = bytearray()
-    # print(self.min_size)
     while len(salt)<self.min_size:
       n = self.base_iteration + int(time.time() * HanonMapRNG.SIGNIFICANT_DIGIT) % HanonMapRNG.DIGIT_MODULO
       hanon_value = self._get_hanon_map_value(n)
       salt += bytearray(struct.pack("f",hanon_value))
-    return bytes(salt)
+    # Ubah salt menjadi string base64
+    return base64.b64encode(salt)
 
-  def _get_hanon_map_value(self,n:int):
+  def _get_hanon_map_value(self,n:int)->float:
     for _ in range(n):
       self.x = 1-self.a * (self.x * self.x) +self.b * self.x
     return self.x
-  
-  """
-  bytearray(struct.pack("f",salt))"""
